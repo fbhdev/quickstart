@@ -108,7 +108,7 @@ function create_client {
   touch yarn.lock
   yarn
   yarn add react-query
-  yarn add react-router
+  yarn add react-router-dom
   yarn add framer-motion
   yarn add @fortawesome/fontawesome-svg-core \
   @fortawesome/free-solid-svg-icons \
