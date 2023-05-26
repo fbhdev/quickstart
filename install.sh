@@ -149,6 +149,7 @@ function create_client {
   rm -rf src || exit
   mkdir src || exit
   cd src || exit
+  mkdir types utils hooks constants components styles
   touch index.css main.tsx App.tsx
   echo "
   @import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap');
