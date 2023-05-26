@@ -108,6 +108,11 @@ function create_client {
   touch yarn.lock
   yarn
   yarn add react-query
+  yarn add react-router
+  yarn add framer-motion
+  yarn add @fortawesome/fontawesome-svg-core \
+  @fortawesome/free-solid-svg-icons \
+  @fortawesome/react-fontawesome
   yarn add -D tailwindcss postcss autoprefixer
   touch tailwind.config.cjs
   touch postcss.config.cjs
