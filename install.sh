@@ -11,92 +11,92 @@ function create_server {
   pip3 install uvicorn
   pip3 install python-dotenv
   echo "
-  import functools
-  import os
+import functools
+import os
 
-  from fastapi import FastAPI
-  from fastapi.middleware.cors import CORSMiddleware
-  from starlette.responses import Response
-  from starlette.requests import Request
-  from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import Response
+from starlette.requests import Request
+from dotenv import load_dotenv
 
-  load_dotenv()
-  app = FastAPI()
-  app.add_middleware(
-      CORSMiddleware,
-      allow_origins=['*'],
-      allow_credentials=True,
-      allow_methods=['*'],
-      allow_headers=['*'],
-  )
+load_dotenv()
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
-  class Project:
-      NAME: str = ''
-      VERSION: str = ''
-
-
-  def cache(minutes: int) -> callable:
-    def decorator(func: callable) -> callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> callable:
-            response = args[0]
-            response.headers['Cache-Control'] = 'public, max-age={}'.format(minutes)
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+class Project:
+    NAME: str = ''
+    VERSION: str = ''
 
 
-  # GET http://localhost:8000/
-  @cache(60)
-  @app.get('/')
-  async def root():
-      return {'message': 'FBH'}
-  " >>api.py
+def cache(seconds: int) -> callable:
+  def decorator(func: callable) -> callable:
+      @functools.wraps(func)
+      def wrapper(*args, **kwargs) -> callable:
+          response = args[0]
+          response.headers['Cache-Control'] = 'public, max-age={}'.format(seconds)
+          return func(*args, **kwargs)
+      return wrapper
+  return decorator
 
-  echo "
-  import sqlite3
-  from typing import Optional, List
+
+# GET http://localhost:8000/
+@cache(60)
+@app.get('/')
+async def root():
+    return {'message': 'FBH'}
+" >>api.py
+
+echo "
+import sqlite3
+from typing import Optional, List
 
 
-  class Database:
+class Database:
 
-    def __init__(self, db_name: str) -> None:
-        if not db_name.endswith('.db'):
-            raise ValueError('{} must end with .db'.format(db_name))
-        self.name = db_name
-        self.conn = self.connect()
-        self.cur = self.cursor()
+  def __init__(self, db_name: str) -> None:
+      if not db_name.endswith('.db'):
+          raise ValueError('{} must end with .db'.format(db_name))
+      self.name = db_name
+      self.conn = self.connect()
+      self.cur = self.cursor()
 
-    def __enter__(self) -> 'Database':
-        return self
+  def __enter__(self) -> 'Database':
+      return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        self.conn.close()
+  def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+      self.conn.close()
 
-    def connect(self) -> sqlite3.Connection:
-        if not self.name:
-            raise ValueError('Database name not found')
-        return sqlite3.connect(self.name)
+  def connect(self) -> sqlite3.Connection:
+      if not self.name:
+          raise ValueError('Database name not found')
+      return sqlite3.connect(self.name)
 
-    def cursor(self) -> sqlite3.Cursor:
-        if not self.conn:
-            raise ValueError('Connection not found')
-        return self.conn.cursor()
+  def cursor(self) -> sqlite3.Cursor:
+      if not self.conn:
+          raise ValueError('Connection not found')
+      return self.conn.cursor()
 
-    def commit(self) -> None:
-        if not self.conn:
-            raise ValueError('Connection not found')
-        self.conn.commit()
+  def commit(self) -> None:
+      if not self.conn:
+          raise ValueError('Connection not found')
+      self.conn.commit()
 
-    def execute(self, sql: str, data: dict = None) -> Optional[List[tuple]]:
-        if not self.cur:
-            raise ValueError('Cursor not found')
-        if data:
-            self.cur.execute(sql, data)
-        else:
-            self.cur.execute(sql)
-        self.commit()
-        return self.cur.fetchall()
+  def execute(self, sql: str, data: dict = None) -> Optional[List[tuple]]:
+      if not self.cur:
+          raise ValueError('Cursor not found')
+      if data:
+          self.cur.execute(sql, data)
+      else:
+          self.cur.execute(sql)
+      self.commit()
+      return self.cur.fetchall()
   " >> database.py
   cd ../ || exit
 }
