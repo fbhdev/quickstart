@@ -134,7 +134,8 @@ function create_client {
       theme: {
           extend: {
               fontFamily: {
-                  'sans': ['Oxygen', 'sans-serif']
+                  'sans': ['Oxygen', 'sans-serif'],
+                  'mono': ['Oxygen Mono', 'monospace']
               }
           },
           screens: {
@@ -151,14 +152,91 @@ function create_client {
   cd src || exit
   mkdir types utils hooks constants components styles
   touch index.css main.tsx App.tsx
+  cd hooks || exit
+  touch useKeyboard.ts useMobile.ts
   echo "
+  import {useEffect, useState} from 'react';
+  import {Breakpoint} from '../constants/Breakpoint';
+
+  export default function useWindowSize(): boolean {
+
+    const [mobile, setMobile] = useState<boolean>(window.innerWidth < Breakpoint);
+
+    useEffect(() => {
+        function resize(): void {
+            setMobile(window.innerWidth < Breakpoint);
+        }
+
+        window.addEventListener('resize', resize);
+        return () => window.removeEventListener('resize', resize);
+    })
+
+    return mobile;
+  }
+  " >>useMobile.ts
+  echo "
+  import {useEffect} from 'react';
+
+  export default function useKeyboard(key: string, action: () => void) {
+      useEffect(() => {
+          const handler = (e: KeyboardEvent) => {
+              if (e.key === key) action();
+          }
+          window.addEventListener('keydown', handler);
+          return () => window.removeEventListener('keydown', handler);
+      })
+  }
+  " >>useKeyboard.ts
+  cd ../utils || exit
+  touch requests.ts
+  echo "
+  const HEADERS = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+
+  async function GET(endpoint: string): Promise<any> {
+    const response = await fetch(endpoint);
+    return await response.json();
+  }
+
+  async function POST(endpoint: string, data: any): Promise<any> {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: HEADERS,
+      body: JSON.stringify(data),
+    });
+    return await response.json();
+  }
+
+  async function PUT(endpoint: string, data: any): Promise<any> {
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      headers: HEADERS,
+      body: JSON.stringify(data),
+    });
+    return await response.json();
+  }
+
+  async function DELETE(endpoint: string): Promise<any> {
+    const response = await fetch(endpoint, {
+      method: 'DELETE',
+      headers: HEADERS,
+    });
+    return await response.json();
+  }
+  " >>requests.ts
+  cd ../ || exit
+  echo "
+  /* https://tailwindcss.com/docs/customizing-colors */
   @import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Oxygen+Mono&display=swap');
   @tailwind base;
   @tailwind components;
   @tailwind utilities;
 
   body {
-      background: #333333;
+      background: #09090b;
   }
 
   " >>index.css
@@ -179,11 +257,6 @@ function create_client {
     </React.StrictMode>
   );" >>main.tsx
   echo "
-  async function GET(endpoint: string): Promise<any> {
-    const response = await fetch(endpoint);
-    return await response.json();
-  }
-
   export default function App(): JSX.Element {
     return (
         <div className={'App'}>
