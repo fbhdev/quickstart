@@ -112,6 +112,8 @@ function create_client {
   yarn add framer-motion
   yarn add @fortawesome/fontawesome-svg-core \
   @fortawesome/free-solid-svg-icons \
+  @fortawesome/free-brands-svg-icons \
+  @fortawesome/free-regular-svg-icons \
   @fortawesome/react-fontawesome
   yarn add -D tailwindcss postcss autoprefixer
   touch tailwind.config.cjs
