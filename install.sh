@@ -4,12 +4,13 @@
 function create_server {
   mkdir server || exit
   cd server || exit
-  touch api.py database.py .env
+  touch resource.py process.py project.py utils.py database.py .env
   python3 -m venv venv || exit
   source venv/bin/activate
   pip3 install fastapi
   pip3 install uvicorn
   pip3 install python-dotenv
+  pip3 install icecream
   echo "
 import functools
 import os
@@ -22,17 +23,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 app = FastAPI()
+ALL = ['*']
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
     allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['*'],
+    allow_origins=ALL,
+    allow_methods=ALL,
+    allow_headers=ALL,
 )
-
-class Project:
-    NAME: str = ''
-    VERSION: str = ''
 
 
 def cache(seconds: int) -> callable:
@@ -47,11 +45,11 @@ def cache(seconds: int) -> callable:
 
 
 # GET http://localhost:8000/
-@cache(60)
+@cache(60**2*24*7)
 @app.get('/')
 async def root():
     return {'message': 'FBH'}
-" >>api.py
+" >>resource.py
 
 echo "
 import sqlite3
@@ -154,19 +152,31 @@ function create_client {
   cd src || exit
   mkdir types utils hooks constants components styles
   touch index.css main.tsx App.tsx
+  cd components || exit
+  mkdir nav ui c1 c2 c3
+  cd ../ || exit
+  cd types || exit
+  touch Base.ts
+  echo "
+  export interface BaseComponent {
+    mobile?: boolean;
+    className?: string;
+    isModal?: boolean;
+    setIsModal?: (value: boolean) => void;
+  }" >> Base.ts
+  cd ../ || exit
   cd hooks || exit
   touch useKeyboard.ts useMobile.ts
   echo "
   import {useEffect, useState} from 'react';
-  import {Breakpoint} from '../constants/Breakpoint';
 
   export default function useWindowSize(): boolean {
 
-    const [mobile, setMobile] = useState<boolean>(window.innerWidth < Breakpoint);
+    const [mobile, setMobile] = useState<boolean>(window.innerWidth < 1024);
 
     useEffect(() => {
         function resize(): void {
-            setMobile(window.innerWidth < Breakpoint);
+            setMobile(window.innerWidth < 1024);
         }
 
         window.addEventListener('resize', resize);
@@ -190,19 +200,22 @@ function create_client {
   }
   " >>useKeyboard.ts
   cd ../utils || exit
-  touch requests.ts
+  touch Icons.tsx Keyboard.ts Requests.ts
   echo "
+  const enum ENDPOINTS {}
+  const enum QUERY_KEYS {}
+
   const HEADERS = {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   };
 
-  async function GET(endpoint: string): Promise<any> {
+  export async function GET(endpoint: string): Promise<any> {
     const response = await fetch(endpoint);
     return await response.json();
   }
 
-  async function POST(endpoint: string, data: any): Promise<any> {
+  export async function POST(endpoint: string, data: any): Promise<any> {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: HEADERS,
@@ -211,7 +224,7 @@ function create_client {
     return await response.json();
   }
 
-  async function PUT(endpoint: string, data: any): Promise<any> {
+  export async function PUT(endpoint: string, data: any): Promise<any> {
     const response = await fetch(endpoint, {
       method: 'PUT',
       headers: HEADERS,
@@ -220,7 +233,7 @@ function create_client {
     return await response.json();
   }
 
-  async function DELETE(endpoint: string): Promise<any> {
+  export async function DELETE(endpoint: string): Promise<any> {
     const response = await fetch(endpoint, {
       method: 'DELETE',
       headers: HEADERS,
@@ -262,7 +275,7 @@ function create_client {
   export default function App(): JSX.Element {
     return (
         <div className={'App'}>
-            FBH
+            {'FBH'}
         </div>
     );
   }" >>App.tsx
