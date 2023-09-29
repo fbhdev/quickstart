@@ -150,7 +150,7 @@ function create_client {
   rm -rf src || exit
   mkdir src || exit
   cd src || exit
-  mkdir types utils hooks constants components styles
+  mkdir types utils hooks constants components styles assets
   touch index.css main.tsx App.tsx
   cd components || exit
   mkdir nav ui c1 c2 c3
@@ -200,7 +200,7 @@ function create_client {
   }
   " >>useKeyboard.ts
   cd ../utils || exit
-  touch Icons.tsx Keyboard.ts Requests.ts
+  touch Icons.tsx Keyboard.ts Requests.ts Animate.ts
   echo "
   const enum ENDPOINTS {}
   const enum QUERY_KEYS {}
