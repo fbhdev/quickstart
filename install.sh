@@ -5,12 +5,13 @@ function create_server {
   mkdir server || exit
   cd server || exit
   touch resource.py process.py project.py utils.py database.py .env
-  python3 -m venv venv || exit
+  python3.9 -m venv venv || exit
   source venv/bin/activate
   pip3 install fastapi
   pip3 install uvicorn
   pip3 install python-dotenv
   pip3 install icecream
+  pip3 install pymongo
   echo "
 import functools
 import os
@@ -162,7 +163,7 @@ function create_client {
     mobile?: boolean;
     className?: string;
     isModal?: boolean;
-    setIsModal?: (value: boolean) => void;
+    setModal?: (value: boolean) => void;
   }" >> Base.ts
   cd ../ || exit
   cd hooks || exit
@@ -200,7 +201,7 @@ function create_client {
   }
   " >>useKeyboard.ts
   cd ../utils || exit
-  touch Icons.tsx Keyboard.ts Requests.ts Animate.ts
+  touch Icons.tsx Keyboard.ts Requests.ts Animate.ts Cache.ts
   echo "
   const enum ENDPOINTS {}
   const enum QUERY_KEYS {}
