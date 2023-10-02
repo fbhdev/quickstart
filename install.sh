@@ -308,13 +308,20 @@ function create_client {
     </React.StrictMode>
   );" >>main.tsx
   echo "
-  export default function App(): JSX.Element {
+  import React from "react";
+  import {BaseComponent} from "./types/Base.ts";
+  
+  
+  const App: React.FC<BaseComponent> = () => {
     return (
         <div className={'App'}>
             {'FBH'}
         </div>
     );
-  }" >>App.tsx
+  }
+  App.displayName = "App";
+  export default React.memo(App);
+  " >>App.tsx
 }
 
 create_server &
