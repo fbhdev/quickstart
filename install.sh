@@ -460,7 +460,7 @@ function create_client_entry {
   import './index.css';
   import App from './App';
   import { QueryClient, QueryClientProvider } from 'react-query';
-  import {BrowserRouter as Router} from "react-router-dom";
+  import {BrowserRouter as Router} from 'react-router-dom';
   const queryClient = new QueryClient();
 
   ReactDOM.createRoot(document.getElementById('root') as HTMLDivElement).render(
@@ -473,13 +473,21 @@ function create_client_entry {
     </React.StrictMode>
   );" >>main.tsx
   echo "
-  export default function App(): JSX.Element {
+  import {Route, Routes} from 'react-router-dom';
+  import React from 'react';
+  import {BaseComponent} from 'Base.ts';
+  
+  const App: React.FC<BaseComponent> = (): => {
     return (
         <div className={'App'}>
             {'FBH'}
         </div>
     );
-  }" >>App.tsx
+  }
+  
+  App.displayName = 'App';
+  export default React.memo(App);
+  " >>App.tsx
 }
 
 # Execution of client creation functions
