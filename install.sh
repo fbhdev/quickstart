@@ -471,7 +471,7 @@ function create_client_entry {
       <QueryClientProvider client={queryClient}>
         <Router>
           <App />
-        <Router/>
+        </Router>
       </QueryClientProvider>
     </React.StrictMode>
   );" >>main.tsx
