@@ -183,13 +183,15 @@ class Project:
 function create_server {
   mkdir server || exit
   cd server || exit
-  touch resource.py process.py project.py utils.py database.py .env
+  touch resource.py process.py project.py utils.py database.py .env requirements.txt
   python3 -m venv venv || exit
   source venv/bin/activate
   pip3 install fastapi
   pip3 install uvicorn
   pip3 install python-dotenv
   pip3 install icecream
+  pip3 install pymongo
+  pip3 install starlette
 
   env_variables
   create_resource
@@ -213,6 +215,7 @@ function install_client_dependencies {
   yarn add react-query
   yarn add react-router-dom
   yarn add framer-motion
+  yarn add tailwind-scrollbar-hide
   yarn add @fortawesome/fontawesome-svg-core \
     @fortawesome/free-solid-svg-icons \
     @fortawesome/free-brands-svg-icons \
