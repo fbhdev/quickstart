@@ -361,6 +361,82 @@ function create_client_utils {
     return await response.json();
   }
   " >>requests.ts
+  echo "
+  const enum KEYBOARD {
+      ENTER = "Enter",
+      ESCAPE = "Escape",
+      TAB = "Tab",
+      BACKSPACE = "Backspace",
+      SHIFT = "Shift",
+      CONTROL = "Control",
+      ALT = "Alt",
+      SPACE = "Space",
+      ARROWUP = "ArrowUp",
+      ARROWDOWN = "ArrowDown",
+      ARROWLEFT = "ArrowLeft",
+      ARROWRIGHT = "ArrowRight",
+      PAGEUP = "PageUp",
+      PAGEDOWN = "PageDown",
+      HOME = "Home",
+      END = "End",
+      INSERT = "Insert",
+      DELETE = "Delete",
+      NUMLOCK = "NumLock",
+      CAPSLOCK = "CapsLock",
+      SCROLLLOCK = "ScrollLock",
+      PAUSEBREAK = "PauseBreak",
+      F1 = "F1",
+      F2 = "F2",
+      F3 = "F3",
+      F4 = "F4",
+      F5 = "F5",
+      F6 = "F6",
+      F7 = "F7",
+      F8 = "F8",
+      F9 = "F9",
+      F10 = "F10",
+      F11 = "F11",
+      F12 = "F12",
+      META = "Meta",
+      CONTEXTMENU = "ContextMenu",
+      PRINTSCREEN = "PrintScreen",
+      A = "KeyA",
+      B = "KeyB",
+      C = "KeyC",
+      D = "KeyD",
+      E = "KeyE",
+      F = "KeyF",
+      G = "KeyG",
+      H = "KeyH",
+      I = "KeyI",
+      J = "KeyJ",
+      K = "KeyK",
+      L = "KeyL",
+      M = "KeyM",
+      N = "KeyN",
+      O = "KeyO",
+      P = "KeyP",
+      Q = "KeyQ",
+      R = "KeyR",
+      S = "KeyS",
+      T = "KeyT",
+      U = "KeyU",
+      V = "KeyV",
+      W = "KeyW",
+      X = "KeyX",
+      Y = "KeyY",
+      Z = "KeyZ",
+      DIGIT0 = "Digit0",
+      DIGIT1 = "Digit1",
+      DIGIT2 = "Digit2",
+      DIGIT3 = "Digit3",
+      DIGIT4 = "Digit4",
+      DIGIT5 = "Digit5",
+      DIGIT6 = "Digit6",
+      DIGIT7 = "Digit7",
+      DIGIT8 = "Digit8",
+      DIGIT9 = "Digit9"
+  }" >>Keyboard.ts
   cd ../ || exit
 }
 
@@ -374,9 +450,8 @@ function create_client_styles {
   @tailwind utilities;
 
   body {
-      background: #09090b;
+    background: #09090b;
   }
-
   " >>index.css
 }
 
@@ -388,24 +463,34 @@ function create_client_entry {
   import './index.css';
   import App from './App';
   import { QueryClient, QueryClientProvider } from 'react-query';
-
+  import {BrowserRouter as Router} from 'react-router-dom';
   const queryClient = new QueryClient();
 
   ReactDOM.createRoot(document.getElementById('root') as HTMLDivElement).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <Router>
+          <App />
+        <Router/>
       </QueryClientProvider>
     </React.StrictMode>
   );" >>main.tsx
   echo "
-  export default function App(): JSX.Element {
+  import {Route, Routes} from 'react-router-dom';
+  import React from 'react';
+  import {BaseComponent} from 'Base.ts';
+  
+  const App: React.FC<BaseComponent> = (): => {
     return (
         <div className={'App'}>
             {'FBH'}
         </div>
     );
-  }" >>App.tsx
+  }
+  
+  App.displayName = 'App';
+  export default React.memo(App);
+  " >>App.tsx
 }
 
 # Execution of client creation functions
