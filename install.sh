@@ -56,15 +56,23 @@ from template import Template
 class Process:
 
   load_dotenv()
-  _MONGO_URI: str = os.getenv('MONGO_UR')
+  _MONGO_URI: str = os.getenv('MONGO_URI')
   _DB_NAME: str = os.getenv('DB_NAME')
   _INSTANCE: 'Process' = None
-  _db = Database(_MONGO_URI, _DB_NAME)
+  _DB = Database(_MONGO_URI, _DB_NAME)
 
   def __new__(cls, *args, **kwargs) -> 'Process':
       if not cls._INSTANCE:
           cls._instance = super(Process, cls).__new__(cls, *args, **kwargs)
       return cls._INSTANCE
+
+  @staticmethod
+  async def results(collection: str) -> dict:
+      Process._DB.collection = collection
+      results = await Process._DB.find_documents()
+      if not results:
+          return Template.generate(Status.INTERNAL_SERVER_ERROR)
+      return Template.generate(Status.OK, results)
   ">>process.py
 }
 
@@ -92,10 +100,10 @@ class Template:
 
     """"""
     @staticmethod
-    def generate(status_code: int, results: list = None, message: str = None) -> dict:
+    def generate(status: int, results: list = None, message: str = None) -> dict:
         """"""
         return {
-            'status_code': status_code,
+            'status': status_code,
             'results': results,
             'message': message
         }
@@ -320,10 +328,10 @@ function create_base_hooks {
 
 function create_client_utils {
   cd utils || exit
-  touch Icons.tsx Keyboard.ts Requests.ts Animate.ts
+  touch Icons.tsx Keyboard.ts Requests.ts Animate.ts Cache.ts
   echo "
-  const enum ENDPOINTS {}
-  const enum QUERY_KEYS {}
+  export const enum ENDPOINTS {}
+  export const enum QUERY_KEYS {}
 
   const HEADERS = {
     'Content-Type': 'application/json',
@@ -437,6 +445,70 @@ const enum KEYBOARD {
   DIGIT8 = 'Digit8',
   DIGIT9 = 'Digit9'
 }" >>Keyboard.ts
+
+echo "
+import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
+import {faMapMarkerAlt} from '@fortawesome/free-solid-svg-icons/faMapMarkerAlt';
+import {faPlane} from '@fortawesome/free-solid-svg-icons/faPlane';
+import {faBox} from '@fortawesome/free-solid-svg-icons/faBox';
+import {faCalendarAlt, faTrashCan} from '@fortawesome/free-solid-svg-icons';
+import {faGear} from '@fortawesome/free-solid-svg-icons/faGear';
+import {faXmark} from '@fortawesome/free-solid-svg-icons/faXmark';
+import {faArrowsRotate} from '@fortawesome/free-solid-svg-icons/faArrowsRotate';
+import {faCopy} from '@fortawesome/free-regular-svg-icons';
+import {faPen} from '@fortawesome/free-solid-svg-icons/faPen';
+import {faTriangleExclamation} from '@fortawesome/free-solid-svg-icons/faTriangleExclamation';
+
+export const Icons = {
+  PLUS: faPlus,
+  LOCATION: faMapMarkerAlt,
+  BOX: faBox,
+  STATUS: faPlane,
+  CALENDAR: faCalendarAlt,
+  SETTINGS: faGear,
+  CLOSE: faXmark,
+  REFRESH: faArrowsRotate,
+  COPY: faCopy,
+  TRASH: faTrashCan,
+  EDIT: faPen,
+  WARNING: faTriangleExclamation
+}" >>Icons.tsx
+
+  echo "
+  export class Cache {
+
+  private static readonly loot = {};
+
+  static get keys() {
+    return this.loot;
+  }
+
+  static getItem(key: string): any {
+    if (!key) {
+      return null;
+    }
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : null;
+  }
+
+  static setItem(key: string, value: unknown): void {
+    if (!key && !value) {
+      return;
+    }
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  static removeItem(key: string): void {
+    if (!key) {
+      return;
+    }
+    localStorage.removeItem(key)
+  }
+
+  static clearCache(): void {
+    localStorage.clear();
+  }
+}" >>Cache.ts
   cd ../ || exit
 }
 
@@ -476,11 +548,26 @@ function create_client_entry {
     </React.StrictMode>
   );" >>main.tsx
   echo "
-  import {Route, Routes} from 'react-router-dom';
+  // import {Route, Routes} from 'react-router-dom';
   import React from 'react';
   import {BaseComponent} from './types/Base.ts';
+
+  const enum Common {
+    PARENT = ''
+  }
+
+  const enum Mobile {
+    PARENT = ''
+  }
+
+  const enum Desktop {
+    PARENT = ''
+  }
   
   const App: React.FC<BaseComponent> = () => {
+
+    const mobile = useWindowSize();
+
     return (
         <div className={'App'}>
             {'FBH'}
