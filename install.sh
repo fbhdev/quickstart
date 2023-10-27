@@ -220,6 +220,7 @@ function setup_vite {
 }
 
 function install_client_dependencies {
+  npm install -D @types/uuid
   yarn add react-query
   yarn add react-router-dom
   yarn add framer-motion
