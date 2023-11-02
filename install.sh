@@ -220,7 +220,8 @@ function setup_vite {
 }
 
 function install_client_dependencies {
-  npm install -D @types/uuid
+  npm install --save @types/node
+  npm install --save @types/uuid
   yarn add react-query
   yarn add react-router-dom
   yarn add framer-motion
@@ -230,6 +231,19 @@ function install_client_dependencies {
     @fortawesome/free-brands-svg-icons \
     @fortawesome/free-regular-svg-icons \
     @fortawesome/react-fontawesome
+
+  yarn add @fortawesome/free-brands-svg-icons
+  yarn add @fortawesome/pro-solid-svg-icons
+  yarn add @fortawesome/pro-regular-svg-icons
+  yarn add @fortawesome/pro-light-svg-icons
+  yarn add @fortawesome/pro-thin-svg-icons
+  yarn add @fortawesome/pro-duotone-svg-icons
+  yarn add @fortawesome/sharp-solid-svg-icons
+  yarn add @fortawesome/sharp-regular-svg-icons
+  yarn add @fortawesome/sharp-light-svg-icons
+
+  npm install --save @fortawesome/fontawesome-pro
+  yarn add @fortawesome/fontawesome-pro
 }
 
 function setup_tailwindcss {
@@ -271,9 +285,32 @@ function setup_tailwindcss {
 
 function structure_client_project {
   rm -rf src || exit
+  touch .yarnrc.yml
+
+  echo "
+plugins:
+  dotenv: { }
+npmScopes:
+  fortawesome:
+    npmAlwaysAuth: true
+    npmRegistryServer: 'https://npm.fontawesome.com/'
+    npmAuthToken: ""
+  ">>.yarnrc.yml
+
   mkdir src || exit
   cd src || exit
   mkdir types utils hooks constants components styles assets
+  cd components || exit
+  mkdir ui
+  cd ui || exit
+  mkdir modal notification nav
+  cd modal || exit
+  touch Modal.tsx
+  cd ../notification || exit
+  touch Notification.tsx
+  cd ../nav || exit
+  touch Nav.tsx
+  cd ../../../ || exit
 }
 
 function create_base_types {
@@ -329,7 +366,7 @@ function create_base_hooks {
 
 function create_client_utils {
   cd utils || exit
-  touch Icons.tsx Keyboard.ts Requests.ts Animate.ts Cache.ts
+  touch Icons.tsx Keyboard.ts Requests.ts Animate.ts Cache.ts Paths.ts
   echo "
   export const enum ENDPOINTS {}
   export const enum QUERY_KEYS {}
@@ -448,30 +485,67 @@ const enum KEYBOARD {
 }" >>Keyboard.ts
 
 echo "
-import {faPlus} from '@fortawesome/free-solid-svg-icons/faPlus';
-import {faMapMarkerAlt} from '@fortawesome/free-solid-svg-icons/faMapMarkerAlt';
-import {faPlane} from '@fortawesome/free-solid-svg-icons/faPlane';
-import {faBox} from '@fortawesome/free-solid-svg-icons/faBox';
-import {faCalendarAlt, faTrashCan} from '@fortawesome/free-solid-svg-icons';
-import {faGear} from '@fortawesome/free-solid-svg-icons/faGear';
-import {faXmark} from '@fortawesome/free-solid-svg-icons/faXmark';
-import {faArrowsRotate} from '@fortawesome/free-solid-svg-icons/faArrowsRotate';
-import {faCopy} from '@fortawesome/free-regular-svg-icons';
-import {faPen} from '@fortawesome/free-solid-svg-icons/faPen';
-import {faTriangleExclamation} from '@fortawesome/free-solid-svg-icons/faTriangleExclamation';
+import React from 'react';
+import {BaseComponent} from '../types/Base.ts';
+import {IconDefinition} from "@fortawesome/free-regular-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faMagicWandSparkles} from "@fortawesome/pro-light-svg-icons/faMagicWandSparkles";
+import {
+  faArrowDownLong,
+  faArrowRightLong,
+  faArrowsRotate, faBars,
+  faBroomWide, faCat, faCloudXmark, faCodeSimple, faCoffee, faComment, faCross,
+  faExternalLink, faFolder, faHandWave, faHockeyStickPuck, faLaptopMobile,
+  faLightbulb, faLighthouse,
+  faPaperPlaneTop, faPlus, faPuzzle, faSeedling, faSplit, faSuitcase, faTriangleExclamation,
+  faXmark
+} from "@fortawesome/pro-light-svg-icons";
+import {faGithub, faLinkedin} from "@fortawesome/free-brands-svg-icons";
+
+interface IconComponent extends BaseComponent {
+  icon: IconDefinition,
+}
+
+export const Icon: React.FC<IconComponent> = ({icon, className, onClick}) => (
+    <div className={'flex items-center justify-center'} onClick={onClick ? onClick : () => {
+    }}>
+      <FontAwesomeIcon icon={icon} className={className ? className : ''}/>
+    </div>
+)
+
+Icon.displayName = 'Icon';
+export default React.memo(Icon);
+
 
 export const Icons = {
   PLUS: faPlus,
-  LOCATION: faMapMarkerAlt,
-  BOX: faBox,
-  STATUS: faPlane,
-  CALENDAR: faCalendarAlt,
-  SETTINGS: faGear,
+  WAND: faMagicWandSparkles,
   CLOSE: faXmark,
-  REFRESH: faArrowsRotate,
-  COPY: faCopy,
-  TRASH: faTrashCan,
-  EDIT: faPen,
+  LINK: faExternalLink,
+  SUBMIT: faPaperPlaneTop,
+  LIGHTBULB: faLightbulb,
+  GITHUB: faGithub,
+  LINKEDIN: faLinkedin,
+  BROOM: faBroomWide,
+  HAND_WAVE: faHandWave,
+  FOLDER: faFolder,
+  SUITCASE: faSuitcase,
+  WEBSITES: faLaptopMobile,
+  COFFEE: faCoffee,
+  TRACKERS: faSplit,
+  CROSS: faCross,
+  AUTOMATION: faArrowsRotate,
+  SEEDLING: faSeedling,
+  CATS: faCat,
+  CODING: faCodeSimple,
+  HOCKEY: faHockeyStickPuck,
+  COMMENT: faComment,
+  ARROW_RIGHT: faArrowRightLong,
+  ARROW_DOWN: faArrowDownLong,
+  LIGHTHOUSE: faLighthouse,
+  NO_DATA: faCloudXmark,
+  PUZZLE: faPuzzle,
+  MENU: faBars,
   WARNING: faTriangleExclamation
 }" >>Icons.tsx
 
@@ -510,6 +584,39 @@ export const Icons = {
     localStorage.clear();
   }
 }" >>Cache.ts
+
+  echo "
+export const Initial = {
+  OPACITY: {opacity: 0}
+}
+
+export const Animate = {
+  OPACITY: {opacity: 1}
+}
+
+export const Exit = {
+  OPACITY: {opacity: 0}
+}
+
+export const Transition = {
+  DEFAULT: {duration: 0.5, ease: 'easeInOut'},
+  LONGER: {duration: 1, ease: 'easeInOut'},
+}
+
+export const Hover = {
+  BRIGHTNESS: {filter: 'brightness(1.1)'}
+}
+
+export const Tap = {
+  PUSH: {scale: 0.95}
+}">>Animate.ts
+
+  echo "
+export const enum Paths {
+  HOME = '/'
+}
+  ">>Paths.ts
+
   cd ../ || exit
 }
 
