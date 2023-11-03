@@ -26,17 +26,6 @@ app.add_middleware(
 )
 
 
-def cache(seconds: int) -> callable:
-  def decorator(func: callable) -> callable:
-      @functools.wraps(func)
-      def wrapper(*args, **kwargs) -> callable:
-          response = args[0]
-          response.headers['Cache-Control'] = 'public, max-age={}'.format(seconds)
-          return func(*args, **kwargs)
-      return wrapper
-  return decorator
-
-
 # GET http://localhost:8000/
 @cache(Project.CACHE_TIME)
 @app.get('/')
@@ -71,8 +60,8 @@ class Process:
       Process._DB.collection = collection
       results = await Process._DB.find_documents()
       if not results:
-          return Template.generate(Status.INTERNAL_SERVER_ERROR)
-      return Template.generate(Status.OK, results)
+          return Template.generate(status=Status.INTERNAL_SERVER_ERROR)
+      return Template.generate(status=Status.OK, results=results)
   ">>process.py
 }
 
@@ -103,7 +92,7 @@ class Template:
     def generate(status: int, results: list = None, message: str = None) -> dict:
         """"""
         return {
-            'status': status_code,
+            'status': status,
             'results': results,
             'message': message
         }
@@ -173,19 +162,9 @@ class Database:
 }
 
 function env_variables {
-  echo "
-MONGO_URI=''
+  echo "MONGO_URI=''
 DB_NAME=''
   " >>.env
-}
-
-function create_project {
-  echo "
-class Project:
-  NAME: str = ''
-  VERSION: str = ''
-  CACHE_TIME: int = (60**2*7*24)
-  ">>project.py
 }
 
 function create_server {
@@ -207,7 +186,6 @@ function create_server {
   create_utils
   create_response_template
   create_database
-  create_project
   cd ../ || exit
 }
 
@@ -407,8 +385,7 @@ function create_client_utils {
     return await response.json();
   }
   " >>requests.ts
-  echo "
-const enum KEYBOARD {
+  echo "export const enum KEYBOARD {
   ENTER = 'Enter',
   ESCAPE = 'Escape',
   TAB = 'Tab',
