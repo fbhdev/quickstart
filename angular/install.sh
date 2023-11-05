@@ -11,6 +11,7 @@ function install_client_dependencies {
   npm install --save @types/node
   npm install --save @types/uuid
   npm install -D tailwindcss postcss autoprefixer
+  npm install tailwind-scrollbar-hide
   npm install --save @fortawesome/fontawesome-svg-core
   npm install --save @fortawesome/free-brands-svg-icons
   #  npm install --save @fortawesome/pro-solid-svg-icons
@@ -21,7 +22,7 @@ function install_client_dependencies {
   #  npm install --save @fortawesome/sharp-solid-svg-icons
   #  npm install --save @fortawesome/sharp-regular-svg-icons
   #  npm install --save @fortawesome/sharp-light-svg-icons
-  npm install --save @fortawesome/fontawesome-pro
+  #  npm install --save @fortawesome/fontawesome-pro
 }
 
 function reset_css {
