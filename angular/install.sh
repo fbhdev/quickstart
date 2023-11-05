@@ -3,6 +3,7 @@ function generate_new_project {
   install_client_dependencies
   cd client/src || exit
   reset_css
+  client_utils
   cd ../ || exit
   tailwind_setup
 }
@@ -70,6 +71,13 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }" >>reset.css
+}
+
+function client_utils {
+  mkdir utils
+  cd utils || exit
+  touch icons.ts
+  cd ../ || exit
 }
 
 function tailwind_setup {
