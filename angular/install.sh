@@ -1,6 +1,6 @@
 function generate_new_project {
   ng new client
-  install_dependencies
+  install_client_dependencies
   cd client/src || exit
   reset_css
   cd ../ || exit
