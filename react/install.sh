@@ -2,9 +2,7 @@
 
 # Server functions
 function create_resource {
-  echo "
-import functools
-import os
+  echo "import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +10,6 @@ from starlette.responses import Response
 from starlette.requests import Request
 from dotenv import load_dotenv
 from process import Process
-from project import Project
 
 load_dotenv()
 app = FastAPI()
@@ -27,7 +24,6 @@ app.add_middleware(
 
 
 # GET http://localhost:8000/
-@cache(Project.CACHE_TIME)
 @app.get('/')
 async def root():
     return {'message': 'FBH'}
@@ -35,8 +31,7 @@ async def root():
 }
 
 function create_process {
-  echo "
-import os
+  echo "import os
 from dotenv import load_dotenv
 from database import Database
 from utils import Status
@@ -62,12 +57,11 @@ class Process:
       if not results:
           return Template.generate(status=Status.INTERNAL_SERVER_ERROR)
       return Template.generate(status=Status.OK, results=results)
-  ">>process.py
+  " >>process.py
 }
 
 function create_utils {
-  echo "
-class Status:
+  echo "class Status:
 
   OK = 200
   CREATED = 201
@@ -80,7 +74,7 @@ class Status:
   NOT_FOUND = 404
 
   INTERNAL_SERVER_ERROR = 500
-  ">>utils.py
+  " >>utils.py
 }
 
 function create_response_template {
@@ -96,7 +90,7 @@ class Template:
             'results': results,
             'message': message
         }
-  ">>template.py
+  " >>template.py
 }
 
 function create_database {
@@ -273,7 +267,7 @@ npmScopes:
     npmAlwaysAuth: true
     npmRegistryServer: 'https://npm.fontawesome.com/'
     npmAuthToken: ""
-  ">>.yarnrc.yml
+  " >>.yarnrc.yml
 
   mkdir src || exit
   cd src || exit
@@ -461,7 +455,7 @@ function create_client_utils {
   DIGIT9 = 'Digit9'
 }" >>Keyboard.ts
 
-echo "
+  echo "
 import React from 'react';
 import {BaseComponent} from '../types/Base.ts';
 import {IconDefinition} from "@fortawesome/free-regular-svg-icons";
@@ -586,13 +580,13 @@ export const Hover = {
 
 export const Tap = {
   PUSH: {scale: 0.95}
-}">>Animate.ts
+}" >>Animate.ts
 
   echo "
 export const enum Paths {
   HOME = '/'
 }
-  ">>Paths.ts
+  " >>Paths.ts
 
   cd ../ || exit
 }
@@ -654,7 +648,7 @@ function create_client_entry {
     const mobile = useWindowSize();
 
     return (
-        <div className={'App'}>
+        <div className={mobile ? Mobile.PARENT : Desktop.PARENT}>
             {'FBH'}
         </div>
     );
