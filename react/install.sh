@@ -139,7 +139,7 @@ class Database:
 
     async def update_document(self, query: dict, data: dict, delete: bool = False) -> UpdateResult:
         return self.collection.update_one(
-            query, {'$unset': data} if delete else {'$set': data}
+            query, {'\$unset': data} if delete else {'\$set': data}
         )
 
     async def delete_document(self, query: dict) -> DeleteResult:
@@ -300,7 +300,7 @@ function create_base_types {
 
 function create_base_hooks {
   cd hooks || exit
-  touch useKeyboard.ts useMobile.ts
+  touch useKeyboard.ts useMobile.ts useNotification.ts
   echo "
   import {useEffect, useState} from 'react';
 
@@ -333,6 +333,33 @@ function create_base_hooks {
       })
   }
   " >>useKeyboard.ts
+  echo "
+  import {useState, useEffect} from 'react';
+import {NotificationModel} from '../components/ui/notification/Notification.model.tsx';
+import {IconDefinition} from '@fortawesome/pro-light-svg-icons';
+
+export const useNotification = (delay: number = 3000) => {
+  const [notification, setNotification] = useState<NotificationModel | undefined>();
+
+  const showNotification = (message: string, icon?: IconDefinition) => {
+    setNotification({message, icon});
+    const timeout = setTimeout(() => {
+      setNotification(undefined);
+    }, delay);
+    return () => clearTimeout(timeout);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (notification) {
+        setNotification(undefined);
+      }
+    };
+  }, [notification]);
+
+  return {notification, showNotification};
+};" >>useNotification.ts
+
   cd ../ || exit
 }
 
@@ -662,9 +689,9 @@ function create_client_entry {
 # Execution of client creation functions
 function create_client {
   setup_vite
+  structure_client_project
   install_client_dependencies
   setup_tailwindcss
-  structure_client_project
   create_base_types
   create_base_hooks
   create_client_utils
