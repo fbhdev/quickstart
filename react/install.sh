@@ -219,6 +219,7 @@ function install_client_dependencies {
 }
 
 function setup_tailwindcss {
+  cd ../ || exit
   yarn add -D tailwindcss postcss autoprefixer
   touch tailwind.config.cjs
   touch postcss.config.cjs
@@ -691,12 +692,12 @@ function create_client {
   setup_vite
   structure_client_project
   install_client_dependencies
-  setup_tailwindcss
   create_base_types
   create_base_hooks
   create_client_utils
   create_client_styles
   create_client_entry
+  setup_tailwindcss
 }
 
 create_server &
