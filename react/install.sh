@@ -658,6 +658,7 @@ function create_client_entry {
   // import {Route, Routes} from 'react-router-dom';
   import React from 'react';
   import {BaseComponent} from './types/Base.ts';
+  import {useWindowSize} from './hooks/useMobile.ts';
 
   const enum Common {
     PARENT = ''
