@@ -658,18 +658,18 @@ function create_client_entry {
   // import {Route, Routes} from 'react-router-dom';
   import React from 'react';
   import {BaseComponent} from './types/Base.ts';
-  import {useWindowSize} from './hooks/useMobile.ts';
+  import useWindowSize from './hooks/useMobile.ts';
 
   const enum Common {
     PARENT = ''
   }
 
   const enum Mobile {
-    PARENT = ''
+    PARENT = '\${Common.PARENT}'
   }
 
   const enum Desktop {
-    PARENT = ''
+    PARENT = '\${Common.PARENT}'
   }
   
   const App: React.FC<BaseComponent> = () => {
@@ -678,7 +678,6 @@ function create_client_entry {
 
     return (
         <div className={mobile ? Mobile.PARENT : Desktop.PARENT}>
-            {'FBH'}
         </div>
     );
   }
