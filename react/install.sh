@@ -165,14 +165,15 @@ function create_server {
   mkdir server || exit
   cd server || exit
   touch resource.py process.py project.py utils.py database.py .env requirements.txt
-  python3 -m venv venv || exit
+  echo "fastapi~=0.103.1
+starlette~=0.27.0
+python-dotenv~=1.0.0
+pymongo~=4.5.0
+uvicorn~=0.22.0
+  ">>requirements.text
+  python3.8 -m venv venv || exit
   source venv/bin/activate
-  pip3 install fastapi
-  pip3 install uvicorn
-  pip3 install python-dotenv
-  pip3 install icecream
-  pip3 install pymongo
-  pip3 install starlette
+  pip3 install -r requirements.txt
 
   env_variables
   create_resource
