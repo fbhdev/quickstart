@@ -164,14 +164,13 @@ DB_NAME=''
 function create_server {
   mkdir server || exit
   cd server || exit
-  touch resource.py process.py project.py utils.py database.py .env requirements.txt
+  touch resource.py process.py project.py utils.py database.py models.py sandbox.py .env requirements.txt
   echo "fastapi~=0.103.1
 starlette~=0.27.0
 python-dotenv~=1.0.0
 pymongo~=4.5.0
 uvicorn~=0.22.0
-icecream~=2.1.3
-  ">>requirements.txt
+icecream~=2.1.3">>requirements.txt
   python3.8 -m venv venv || exit
   source venv/bin/activate
   pip3 install -r requirements.txt
@@ -274,6 +273,10 @@ npmScopes:
 
   mkdir src || exit
   cd src || exit
+  touch environment.ts
+  echo "export const environment = {
+  isProduction: false
+};">>environment.ts
   mkdir types utils hooks constants components styles assets
   cd components || exit
   mkdir ui
@@ -367,46 +370,46 @@ export const useNotification = (delay: number = 3000) => {
 function create_client_utils {
   cd utils || exit
   touch Icons.tsx Keyboard.ts Requests.ts Animate.ts Cache.ts Paths.ts
-  echo "
-  export const enum ENDPOINTS {}
-  export const enum QUERY_KEYS {}
+  echo "const host = '';
 
-  const HEADERS = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  };
+export const ENDPOINTS = {}
+export const enum QUERY_KEYS {}
 
-  export async function GET(endpoint: string): Promise<any> {
-    const response = await fetch(endpoint);
-    return await response.json();
-  }
+const HEADERS = {
+  'Content-Type': 'application/json',
+  Accept: 'application/json',
+};
 
-  export async function POST(endpoint: string, data: any): Promise<any> {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: HEADERS,
-      body: JSON.stringify(data),
-    });
-    return await response.json();
-  }
+export async function GET(endpoint: string): Promise<any> {
+  const response = await fetch(endpoint);
+  return await response.json();
+}
 
-  export async function PUT(endpoint: string, data: any): Promise<any> {
-    const response = await fetch(endpoint, {
-      method: 'PUT',
-      headers: HEADERS,
-      body: JSON.stringify(data),
-    });
-    return await response.json();
-  }
+export async function POST(endpoint: string, data: any): Promise<any> {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: HEADERS,
+    body: JSON.stringify(data),
+  });
+  return await response.json();
+}
 
-  export async function DELETE(endpoint: string): Promise<any> {
-    const response = await fetch(endpoint, {
-      method: 'DELETE',
-      headers: HEADERS,
-    });
-    return await response.json();
-  }
-  " >>requests.ts
+export async function PUT(endpoint: string, data: any): Promise<any> {
+  const response = await fetch(endpoint, {
+    method: 'PUT',
+    headers: HEADERS,
+    body: JSON.stringify(data),
+  });
+  return await response.json();
+}
+
+export async function DELETE(endpoint: string): Promise<any> {
+  const response = await fetch(endpoint, {
+    method: 'DELETE',
+    headers: HEADERS,
+  });
+  return await response.json();
+}" >>requests.ts
   echo "export const enum KEYBOARD {
   ENTER = 'Enter',
   ESCAPE = 'Escape',
