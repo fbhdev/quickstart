@@ -170,7 +170,8 @@ starlette~=0.27.0
 python-dotenv~=1.0.0
 pymongo~=4.5.0
 uvicorn~=0.22.0
-  ">>requirements.text
+icecream~=2.1.3
+  ">>requirements.txt
   python3.8 -m venv venv || exit
   source venv/bin/activate
   pip3 install -r requirements.txt
@@ -194,7 +195,7 @@ function setup_vite {
 
 function install_client_dependencies {
   npm install --save @types/node
-  npm install --save @types/uuid
+  npm i uuid
   yarn add react-query
   yarn add react-router-dom
   yarn add framer-motion
@@ -294,8 +295,6 @@ function create_base_types {
   export interface BaseComponent {
     mobile?: boolean;
     className?: string;
-    isModal?: boolean;
-    setModal?: (value: boolean) => void;
   }" >>Base.ts
   cd ../ || exit
 }
@@ -484,69 +483,95 @@ function create_client_utils {
   DIGIT9 = 'Digit9'
 }" >>Keyboard.ts
 
-  echo "
-import React from 'react';
-import {BaseComponent} from '../types/Base.ts';
-import {IconDefinition} from "@fortawesome/free-regular-svg-icons";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faMagicWandSparkles} from "@fortawesome/pro-light-svg-icons/faMagicWandSparkles";
+  echo "import {faGlobeEurope} from '@fortawesome/pro-light-svg-icons/faGlobeEurope';
+import {faTrophy} from '@fortawesome/pro-light-svg-icons/faTrophy';
 import {
-  faArrowDownLong,
-  faArrowRightLong,
-  faArrowsRotate, faBars,
-  faBroomWide, faCat, faCloudXmark, faCodeSimple, faCoffee, faComment, faCross,
-  faExternalLink, faFolder, faHandWave, faHockeyStickPuck, faLaptopMobile,
-  faLightbulb, faLighthouse,
-  faPaperPlaneTop, faPlus, faPuzzle, faSeedling, faSplit, faSuitcase, faTriangleExclamation,
-  faXmark
-} from "@fortawesome/pro-light-svg-icons";
-import {faGithub, faLinkedin} from "@fortawesome/free-brands-svg-icons";
+  faBars, faBroomWide,
+  faCat,
+  faCheck, faDatabase, faExternalLink, faGear, faHouseLaptop, faLock,
+  faMagicWandSparkles, faMagnifyingGlass,
+  faPaperPlane,
+  faPen,
+  faPlus, faShare, faTableColumns,
+  faTrashCan, faUnlock, faXmark, IconDefinition
+} from '@fortawesome/pro-light-svg-icons';
+import {faChevronLeft} from '@fortawesome/pro-light-svg-icons/faChevronLeft';
+import {faChevronRight} from '@fortawesome/pro-light-svg-icons/faChevronRight';
+import {faPaw} from '@fortawesome/pro-light-svg-icons/faPaw';
+import {faInfoCircle} from '@fortawesome/pro-light-svg-icons/faInfoCircle';
+import {faCode} from '@fortawesome/pro-light-svg-icons/faCode';
+
+import {faGithub} from '@fortawesome/free-brands-svg-icons/faGithub';
+import {faLinkedinIn} from '@fortawesome/free-brands-svg-icons/faLinkedinIn';
+import {faJs, faPython, faReact} from '@fortawesome/free-brands-svg-icons';
+import {BaseComponent} from '../types/Base.ts';
+import React from 'react';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 interface IconComponent extends BaseComponent {
-  icon: IconDefinition,
+  icon: IconDefinition;
+  onClick?: (...args: unknown[]) => void;
 }
 
-export const Icon: React.FC<IconComponent> = ({icon, className, onClick}) => (
-    <div className={'flex items-center justify-center'} onClick={onClick ? onClick : () => {
-    }}>
-      <FontAwesomeIcon icon={icon} className={className ? className : ''}/>
-    </div>
-)
+const enum Common {
+  PARENT = 'p-3 rounded-md h-16 w-16 flex items-center justify-center cursor-pointer select-none aspect-square'
+}
 
-Icon.displayName = 'Icon';
-export default React.memo(Icon);
+const enum Mobile {
+  PARENT = \`\${Common.PARENT}\`
+}
+
+const enum Desktop {
+  PARENT = \`\${Common.PARENT}\`
+}
+
+export const Icon: React.FC<IconComponent> = ({mobile, icon, onClick, className}) => {
+
+  const onClassName = (className: string | undefined): string => {
+    const result = className ? className : '';
+    return mobile ? \`\${Mobile.PARENT} \${result}\` : \`\${Desktop.PARENT} \${result}\`
+  }
+
+  return (
+    <div className={onClassName(className)} onClick={onClick}>
+      <FontAwesomeIcon icon={icon}/>
+    </div>
+  );
+}
 
 
 export const Icons = {
-  PLUS: faPlus,
-  WAND: faMagicWandSparkles,
-  CLOSE: faXmark,
-  LINK: faExternalLink,
-  SUBMIT: faPaperPlaneTop,
-  LIGHTBULB: faLightbulb,
+  EARTH: faGlobeEurope,
+  TROPHY: faTrophy,
+  SUBMIT: faPaperPlane,
+  CAT: faCat,
+  ARROW_LEFT: faChevronLeft,
+  ARROW_RIGHT: faChevronRight,
+  PAW: faPaw,
+  INFO: faInfoCircle,
+  SPARKLES: faMagicWandSparkles,
   GITHUB: faGithub,
-  LINKEDIN: faLinkedin,
+  LINKED_IN: faLinkedinIn,
+  CODE: faCode,
+  ADD: faPlus,
+  TRASH: faTrashCan,
+  PEN: faPen,
+  CHECK: faCheck,
+  CLOSE: faXmark,
+  REACT: faReact,
+  TYPESCRIPT: faJs,
+  PYTHON: faPython,
+  MONGO: faDatabase,
+  SEARCH: faMagnifyingGlass,
+  EXTERNAL: faExternalLink,
+  BARS: faBars,
+  DASHBOARD: faTableColumns,
+  SHARE: faShare,
+  LOCK: faLock,
+  UNLOCK: faUnlock,
+  REMOTE: faHouseLaptop,
   BROOM: faBroomWide,
-  HAND_WAVE: faHandWave,
-  FOLDER: faFolder,
-  SUITCASE: faSuitcase,
-  WEBSITES: faLaptopMobile,
-  COFFEE: faCoffee,
-  TRACKERS: faSplit,
-  CROSS: faCross,
-  AUTOMATION: faArrowsRotate,
-  SEEDLING: faSeedling,
-  CATS: faCat,
-  CODING: faCodeSimple,
-  HOCKEY: faHockeyStickPuck,
-  COMMENT: faComment,
-  ARROW_RIGHT: faArrowRightLong,
-  ARROW_DOWN: faArrowDownLong,
-  LIGHTHOUSE: faLighthouse,
-  NO_DATA: faCloudXmark,
-  PUZZLE: faPuzzle,
-  MENU: faBars,
-  WARNING: faTriangleExclamation
+  SETTINGS: faGear
 }" >>Icons.tsx
 
   echo "
