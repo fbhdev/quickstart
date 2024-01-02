@@ -671,7 +671,7 @@ function create_client_entry {
   import './index.css';
   import App from './App';
   import { QueryClient, QueryClientProvider } from 'react-query';
-  import {BrowserRouter as Router} from 'react-router-dom';
+  import {HashRouter as Router} from 'react-router-dom';
   const queryClient = new QueryClient();
 
   ReactDOM.createRoot(document.getElementById('root') as HTMLDivElement).render(
