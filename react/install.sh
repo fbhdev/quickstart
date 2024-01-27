@@ -25,8 +25,8 @@ app.add_middleware(
 
 # GET http://localhost:8000/
 @app.get('/')
-async def root():
-    return {'message': 'FBH'}
+async def root() -> None:
+    return {}
   " >>resource.py
 }
 
@@ -61,7 +61,8 @@ class Process:
 }
 
 function create_utils {
-  echo "class Status:
+  echo "
+class Status:
 
   OK = 200
   CREATED = 201
@@ -73,8 +74,7 @@ function create_utils {
   FORBIDDEN = 403
   NOT_FOUND = 404
 
-  INTERNAL_SERVER_ERROR = 500
-  " >>utils.py
+  INTERNAL_SERVER_ERROR = 500" >>utils.py
 }
 
 function create_response_template {
@@ -156,7 +156,8 @@ class Database:
 }
 
 function env_variables {
-  echo "MONGO_URI=''
+  echo "
+MONGO_URI=''
 DB_NAME=''
   " >>.env
 }
@@ -171,8 +172,8 @@ python-dotenv~=1.0.0
 pymongo~=4.5.0
 uvicorn~=0.22.0
 icecream~=2.1.3">>requirements.txt
-  python3.8 -m venv venv || exit
-  source venv/bin/activate
+  python3.8 -m venv .venv || exit
+  source .venv/bin/activate
   pip3 install -r requirements.txt
 
   env_variables
@@ -184,7 +185,6 @@ icecream~=2.1.3">>requirements.txt
   cd ../ || exit
 }
 
-# Client functions
 function setup_vite {
   yarn create vite client --template react-ts
   cd client || exit
@@ -193,8 +193,8 @@ function setup_vite {
 }
 
 function install_client_dependencies {
-  npm install --save @types/node
   npm i uuid
+  npm install --save @types/node
   yarn add react-query
   yarn add react-router-dom
   yarn add framer-motion
@@ -257,9 +257,8 @@ function setup_tailwindcss {
   }" >>tailwind.config.cjs
 }
 
-function structure_client_project {
-  rm -rf src || exit
-  touch .yarnrc.yml
+function create_rc {
+touch .yarnrc.yml
 
   echo "
 plugins:
@@ -270,75 +269,115 @@ npmScopes:
     npmRegistryServer: 'https://npm.fontawesome.com/'
     npmAuthToken: ""
   " >>.yarnrc.yml
+}
+
+function create_environment {
+  touch environment.ts
+  echo "
+export const environment = {
+  isProduction: false
+};">>environment.ts
+}
+
+function structure_client_project {
+  rm -rf src || exit
+  create_rc
 
   mkdir src || exit
   cd src || exit
-  touch environment.ts
-  echo "export const environment = {
-  isProduction: false
-};">>environment.ts
-  mkdir types utils hooks constants components styles assets
+  mkdir types utils hooks constants components styles assets context
+  create_environment
+  create_context
+  create_components
+}
+
+function create_components {
   cd components || exit
   mkdir ui
   cd ui || exit
   mkdir modal notification nav
   cd modal || exit
-  touch Modal.tsx
+  touch modal.component.tsx modal.model.tsx
+  echo "
+const enum Common {
+ PARENT = ''
+}
+
+export const enum Mobile {
+ PARENT = \`\${Common.PARENT}\`
+}
+
+export const enum Desktop {
+ PARENT = \`\${Common.PARENT}\`
+}">.modal.model.tsx
   cd ../notification || exit
-  touch Notification.tsx
+  touch notification.component.tsx notification.model.tsx
+  echo "
+const enum Common {
+ PARENT = ''
+}
+
+export const enum Mobile {
+ PARENT = \`\${Common.PARENT}\`
+}
+
+export const enum Desktop {
+ PARENT = \`\${Common.PARENT}\`
+}">.notification.model.tsx
   cd ../nav || exit
-  touch Nav.tsx
+  touch nav.component.tsx nav.model.tsx
+  echo "
+const enum Common {
+ PARENT = ''
+}
+
+export const enum Mobile {
+ PARENT = \`\${Common.PARENT}\`
+}
+
+export const enum Desktop {
+ PARENT = \`\${Common.PARENT}\`
+}">.nav.model.tsx
   cd ../../../ || exit
 }
 
 function create_base_types {
   cd types || exit
-  touch Base.ts
+  touch base.model.tsx
   echo "
-  export interface BaseComponent {
+  export interface BaseModel {
     mobile?: boolean;
     className?: string;
-  }" >>Base.ts
+  }" >>base.model.tsx
   cd ../ || exit
 }
 
-function create_base_hooks {
-  cd hooks || exit
-  touch useKeyboard.ts useMobile.ts useNotification.ts
+function create_mobile_hook {
+  touch useMobile.ts
   echo "
-  import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 
-  export default function useWindowSize(): boolean {
+export default function useMobile(): boolean {
 
-    const [mobile, setMobile] = useState<boolean>(window.innerWidth < 1024);
+  const [mobile, setMobile] = useState<boolean>(window.innerWidth < 1024);
 
-    useEffect(() => {
-        function resize(): void {
-            setMobile(window.innerWidth < 1024);
-        }
+  useEffect(() => {
+      function resize(): void {
+          setMobile(window.innerWidth < 1024);
+      }
 
-        window.addEventListener('resize', resize);
-        return () => window.removeEventListener('resize', resize);
-    })
+      window.addEventListener('resize', resize);
+      return () => window.removeEventListener('resize', resize);
+  })
 
-    return mobile;
-  }
-  " >>useMobile.ts
+  return mobile;
+}" >>useMobile.ts
+}
+
+function create_notification_hook {
+  touch useNotification.ts
   echo "
-  import {useEffect} from 'react';
-
-  export default function useKeyboard(key: string, action: () => void) {
-      useEffect(() => {
-          const handler = (e: KeyboardEvent) => {
-              if (e.key === key) action();
-          }
-          window.addEventListener('keydown', handler);
-          return () => window.removeEventListener('keydown', handler);
-      })
-  }
-  " >>useKeyboard.ts
-  echo "
-  import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {NotificationModel} from '../components/ui/notification/Notification.model.tsx';
 import {IconDefinition} from '@fortawesome/pro-light-svg-icons';
 
@@ -363,54 +402,43 @@ export const useNotification = (delay: number = 3000) => {
 
   return {notification, showNotification};
 };" >>useNotification.ts
+}
 
+function create_keyboard_hook {
+  touch useKeyboard.ts
+  echo "
+import {useEffect} from 'react';
+
+export default function useKeyboard(key: string, action: () => void) {
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === key) action();
+        }
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    })
+}
+" >>useKeyboard.ts
+}
+
+function create_base_hooks {
+  cd hooks || exit
+  create_mobile_hook
+  create_notification_hook
+  create_keyboard_hook
   cd ../ || exit
 }
 
-function create_client_utils {
-  cd utils || exit
-  touch Icons.tsx Keyboard.ts Requests.ts Animate.ts Cache.ts Paths.ts
-  echo "const host = '';
-
-export const ENDPOINTS = {}
-export const enum QUERY_KEYS {}
-
-const HEADERS = {
-  'Content-Type': 'application/json',
-  Accept: 'application/json',
-};
-
-export async function GET(endpoint: string): Promise<any> {
-  const response = await fetch(endpoint);
-  return await response.json();
+function create_context {
+  cd context || exit
+  touch modal.context.tsx notification.context.tsx mobile.context.tsx
+  cd ../ || exit
 }
 
-export async function POST(endpoint: string, data: any): Promise<any> {
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: HEADERS,
-    body: JSON.stringify(data),
-  });
-  return await response.json();
-}
-
-export async function PUT(endpoint: string, data: any): Promise<any> {
-  const response = await fetch(endpoint, {
-    method: 'PUT',
-    headers: HEADERS,
-    body: JSON.stringify(data),
-  });
-  return await response.json();
-}
-
-export async function DELETE(endpoint: string): Promise<any> {
-  const response = await fetch(endpoint, {
-    method: 'DELETE',
-    headers: HEADERS,
-  });
-  return await response.json();
-}" >>requests.ts
-  echo "export const enum KEYBOARD {
+function create_keyboard_utils {
+  touch keyboard.constants.tsx
+  echo "
+export const enum KEYBOARD {
   ENTER = 'Enter',
   ESCAPE = 'Escape',
   TAB = 'Tab',
@@ -484,9 +512,14 @@ export async function DELETE(endpoint: string): Promise<any> {
   DIGIT7 = 'Digit7',
   DIGIT8 = 'Digit8',
   DIGIT9 = 'Digit9'
-}" >>Keyboard.ts
+}" >>keyboard.constants.ts
+}
 
-  echo "import {faGlobeEurope} from '@fortawesome/pro-light-svg-icons/faGlobeEurope';
+
+function create_icon_constants {
+  touch icons.constants.tsx
+  echo "
+  import {faGlobeEurope} from '@fortawesome/pro-light-svg-icons/faGlobeEurope';
 import {faTrophy} from '@fortawesome/pro-light-svg-icons/faTrophy';
 import {
   faBars, faBroomWide,
@@ -507,41 +540,17 @@ import {faCode} from '@fortawesome/pro-light-svg-icons/faCode';
 import {faGithub} from '@fortawesome/free-brands-svg-icons/faGithub';
 import {faLinkedinIn} from '@fortawesome/free-brands-svg-icons/faLinkedinIn';
 import {faJs, faPython, faReact} from '@fortawesome/free-brands-svg-icons';
-import {BaseComponent} from '../types/Base.ts';
 import React from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
-interface IconComponent extends BaseComponent {
-  icon: IconDefinition;
-  onClick?: (...args: unknown[]) => void;
-}
-
-const enum Common {
-  PARENT = 'p-3 rounded-md h-16 w-16 flex items-center justify-center cursor-pointer select-none aspect-square'
-}
-
-const enum Mobile {
-  PARENT = \`\${Common.PARENT}\`
-}
-
-const enum Desktop {
-  PARENT = \`\${Common.PARENT}\`
-}
-
-export const Icon: React.FC<IconComponent> = ({mobile, icon, onClick, className}) => {
-
-  const onClassName = (className: string | undefined): string => {
-    const result = className ? className : '';
-    return mobile ? \`\${Mobile.PARENT} \${result}\` : \`\${Desktop.PARENT} \${result}\`
-  }
-
-  return (
-    <div className={onClassName(className)} onClick={onClick}>
-      <FontAwesomeIcon icon={icon}/>
-    </div>
-  );
-}
-
+export const Brands = {
+  GITHUB: faGithub,
+  LINKED_IN: faLinkedinIn,
+  REACT: faReact,
+  TYPESCRIPT: faJs,
+  PYTHON: faPython,
+  MONGO: faDatabase,
+} as Record<string, IconDefinition>;
 
 export const Icons = {
   EARTH: faGlobeEurope,
@@ -553,18 +562,12 @@ export const Icons = {
   PAW: faPaw,
   INFO: faInfoCircle,
   SPARKLES: faMagicWandSparkles,
-  GITHUB: faGithub,
-  LINKED_IN: faLinkedinIn,
   CODE: faCode,
   ADD: faPlus,
   TRASH: faTrashCan,
   PEN: faPen,
   CHECK: faCheck,
   CLOSE: faXmark,
-  REACT: faReact,
-  TYPESCRIPT: faJs,
-  PYTHON: faPython,
-  MONGO: faDatabase,
   SEARCH: faMagnifyingGlass,
   EXTERNAL: faExternalLink,
   BARS: faBars,
@@ -575,8 +578,55 @@ export const Icons = {
   REMOTE: faHouseLaptop,
   BROOM: faBroomWide,
   SETTINGS: faGear
-}" >>Icons.tsx
+} as Record<string, IconDefinition>" >>icons.constants.tsx
+}
 
+function create_http_requests {
+  touch requests.tsx
+  echo "const host = '';
+
+export const ENDPOINTS = {}
+export const enum QUERY_KEYS {}
+
+const HEADERS = {
+  'Content-Type': 'application/json',
+  Accept: 'application/json',
+};
+
+export async function GET(endpoint: string): Promise<any> {
+  const response = await fetch(endpoint);
+  return await response.json();
+}
+
+export async function POST(endpoint: string, data: any): Promise<any> {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: HEADERS,
+    body: JSON.stringify(data),
+  });
+  return await response.json();
+}
+
+export async function PUT(endpoint: string, data: any): Promise<any> {
+  const response = await fetch(endpoint, {
+    method: 'PUT',
+    headers: HEADERS,
+    body: JSON.stringify(data),
+  });
+  return await response.json();
+}
+
+export async function DELETE(endpoint: string): Promise<any> {
+  const response = await fetch(endpoint, {
+    method: 'DELETE',
+    headers: HEADERS,
+  });
+  return await response.json();
+}" >>requests.tsx
+}
+
+function create_cache_methods {
+  touch cache.tsx
   echo "
   export class Cache {
 
@@ -611,8 +661,11 @@ export const Icons = {
   static clearCache(): void {
     localStorage.clear();
   }
-}" >>Cache.ts
+}" >>cache.tsx
+}
 
+function create_animation_constants {
+  touch animate.constants.tsx
   echo "
 export const Initial = {
   OPACITY: {opacity: 0}
@@ -637,83 +690,101 @@ export const Hover = {
 
 export const Tap = {
   PUSH: {scale: 0.95}
-}" >>Animate.ts
-
-  echo "
-export const enum Paths {
-  HOME = '/'
+}" >>animate.constants.tsx
 }
-  " >>Paths.ts
 
+function create_project_routes {
+  touch project.routes.tsx
+  echo "
+export const enum Routes {
+  HOME = '/'
+}" >>project.routes.tsx
+}
+
+function create_client_utils {
+  cd utils || exit
+  create_keyboard_utils
+  create_icon_constants
+  create_http_requests
+  create_cache_methods
+  create_animation_constants
+  create_project_routes
   cd ../ || exit
 }
 
-function create_client_styles {
-  echo "
-  /* https://tailwindcss.com/docs/customizing-colors */
-  @import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap');
-  @import url('https://fonts.googleapis.com/css2?family=Oxygen+Mono&display=swap');
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-
-  body {
-    background: #09090b;
-  }
-  " >>index.css
-}
 
 function create_client_entry {
-  touch index.css main.tsx App.tsx
+  create_client_styles
+  create_main_component
+  create_app_component
+}
+
+function create_client_styles {
+  touch index.css
   echo "
-  import React from 'react';
-  import ReactDOM from 'react-dom/client';
-  import './index.css';
-  import App from './App';
-  import { QueryClient, QueryClientProvider } from 'react-query';
-  import {HashRouter as Router} from 'react-router-dom';
-  const queryClient = new QueryClient();
+/* https://tailwindcss.com/docs/customizing-colors */
+@import url('https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oxygen+Mono&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  ReactDOM.createRoot(document.getElementById('root') as HTMLDivElement).render(
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <App />
-        </Router>
-      </QueryClientProvider>
-    </React.StrictMode>
-  );" >>main.tsx
+body {
+  background: #09090b;
+}" >>index.css
+}
+
+function create_main_component {
+  touch main.tsx
   echo "
-  // import {Route, Routes} from 'react-router-dom';
-  import React from 'react';
-  import {BaseComponent} from './types/Base.ts';
-  import useWindowSize from './hooks/useMobile.ts';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import {HashRouter as Router} from 'react-router-dom';
+const queryClient = new QueryClient();
 
-  const enum Common {
-    PARENT = ''
-  }
+ReactDOM.createRoot(document.getElementById('root') as HTMLDivElement).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <App />
+      </Router>
+    </QueryClientProvider>
+  </React.StrictMode>
+);" >>main.tsx
+}
 
-  const enum Mobile {
-    PARENT = '\${Common.PARENT}'
-  }
+function create_app_component {
+  touch app.component.tsx app.model.tsx
+  echo "
+import {BaseModel} from './types/base.model.tsx';
+import {Mobile, Desktop} from './app.model.tsx/
+import useWindowSize from './hooks/useMobile.ts';
 
-  const enum Desktop {
-    PARENT = '\${Common.PARENT}'
-  }
-  
-  const App: React.FC<BaseComponent> = () => {
+export const App = function () {
 
-    const mobile = useWindowSize();
+  const mobile = useMobile();
 
-    return (
-        <div className={mobile ? Mobile.PARENT : Desktop.PARENT}>
-        </div>
-    );
-  }
-  
-  App.displayName = 'App';
-  export default React.memo(App);
-  " >>App.tsx
+  return (
+      <div className={mobile ? Mobile.PARENT : Desktop.PARENT}>
+      </div>
+  );
+}" >>app.component.tsx
+
+  echo "
+const enum Common {
+ PARENT = ''
+}
+
+export const enum Mobile {
+ PARENT = \`\${Common.PARENT}\`
+}
+
+export const enum Desktop {
+ PARENT = \`\${Common.PARENT}\`
+}">.app.model.tsx
 }
 
 # Execution of client creation functions
