@@ -1,6 +1,7 @@
-function main {
-  bash server.sh &
-  wait $!
+#!/bin/bash
+
+main() {
+  bash server.sh
   bash client.sh
 }
 

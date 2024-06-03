@@ -1,5 +1,7 @@
+#!/bin/bash
+
 function generate_angular_project {
-  ng new client
+  ng new client --skip-git --style=scss --routing
   install_client_dependencies
   cd client/src || exit
   reset_css
@@ -28,9 +30,9 @@ function install_client_dependencies {
   npm install --save @fortawesome/fontawesome-pro
 }
 
-function create_reset_css {
-  touch reset.css
-  echo "html, body, div, span, applet, object, iframe,
+function reset_css {
+  cat <<EOL > reset.css
+html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
 del, dfn, em, img, ins, kbd, q, s, samp,
@@ -72,15 +74,15 @@ q:before, q:after {
 table {
 	border-collapse: collapse;
 	border-spacing: 0;
-}" >>reset.css
+}
+EOL
 }
 
 function tailwind_setup {
-  touch tailwind.config.cjs
-  echo "
+  cat <<EOL > tailwind.config.cjs
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./**/*.html'],
+  content: ['./src/**/*.{html,ts}'],
   theme: {
     extend: {
       fontSize: {
@@ -93,13 +95,14 @@ module.exports = {
     require('autoprefixer'),
     require('tailwind-scrollbar-hide')
   ],
-}" >>tailwind.config.cjs
+}
+EOL
 
-  cd src || exit
-  echo "@import 'tailwindcss/base';
+  cat <<EOL > src/styles.scss
+@import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
-  " >>styles.scss
-
-  cd ../ || exit
+EOL
 }
+
+generate_angular_project

@@ -1,7 +1,9 @@
-mkdir server && cd server || exit
+#!/bin/bash
 
-touch package.json .env
-echo '
+mkdir -p server && cd server || exit
+
+# Create package.json
+cat <<EOL > package.json
 {
   "name": "express API",
   "version": "1.0.0",
@@ -26,14 +28,13 @@ echo '
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.21",
     "@types/node": "^20.12.6",
-    "types": "^0.1.1",
     "typescript": "^5.4.4"
   }
-}' >> package.json
+}
+EOL
 
-
-touch tsconfig.json
-echo '
+# Create tsconfig.json
+cat <<EOL > tsconfig.json
 {
   "compilerOptions": {
     "module": "commonjs",
@@ -60,21 +61,20 @@ echo '
   "lib": [
     "es6"
   ]
-}' >> tsconfig.json
+}
+EOL
 
-mkdir src
+mkdir -p src/controllers/root src/routes/root
 cd src || exit
 
+# Install dependencies
 npm install
 
-# index
-touch index.ts
-echo "
-
+# Create index.ts
+cat <<EOL > index.ts
 import bodyParser from 'body-parser';
 import express, {Express} from 'express';
-import rootRouter from './routes/root';
-import entriesRouter from './routes/entries';
+import rootRouter from './routes/root/root';
 import {MongoClient} from 'mongodb';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -92,15 +92,16 @@ async function start(): Promise<void> {
     dotenv.config();
     app.use(cors());
 
-    const mongo: MongoClient = await MongoClient.connect(process.ENV.MONGO_URI);
+    const mongo: MongoClient = new MongoClient(process.env.MONGO_URI);
     await mongo.connect();
     app.set('db', mongo.db('portfolio'));
 
-    app.use(bodyParser.json({ // Use bodyParser as middleware
+    app.use(bodyParser.json({
       limit: '500kb',
     }));
 
     // routes
+    app.use('/', rootRouter);
 
     app.listen(PORT, onSuccess);
 
@@ -110,29 +111,23 @@ async function start(): Promise<void> {
 }
 
 start();
-">>index.ts
+EOL
 
-mkdir controllers routes
-
-# routes
-cd routes || exit
-mdkir root && cd root || exit
-touch root.ts
-echo 'import {Router} from "express";
-import { getRootController } from "../controllers/root/getRoot";
+# Create routes/root/root.ts
+cat <<EOL > routes/root/root.ts
+import {Router} from "express";
+import { getRootController } from "../../controllers/root/getRoot";
 
 const rootRouter: Router = Router();
 
 rootRouter.get("/", getRootController);
 
-export default rootRouter;' >>root.ts
-cd ../../ || exit
+export default rootRouter;
+EOL
 
-# controllers
-cd controllers || exit
-mdkir root && cd root
-touch getRoot.ts
-echo 'import {Request, Response, NextFunction} from "express";
+# Create controllers/root/getRoot.ts
+cat <<EOL > controllers/root/getRoot.ts
+import {Request, Response, NextFunction} from "express";
 
 export async function getRootController(req: Request, res: Response, nextFn: NextFunction): Promise<void> {
     try {
@@ -140,5 +135,5 @@ export async function getRootController(req: Request, res: Response, nextFn: Nex
     } catch (error) {
         console.log(error);
     }
-}'>>getRoot.ts
-cd ../../../ || exit
+}
+EOL
