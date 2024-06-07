@@ -2,36 +2,33 @@
 
 function generate_angular_project {
   ng new client --skip-git --style=scss --routing
+  cd client || exit
   install_client_dependencies
-  cd client/src || exit
-  reset_css
-  tailwind_setup
+  setup_styles
+  cd ..
 }
 
 function install_client_dependencies {
-  npm install --save @types/node
-  npm install --save @types/uuid
-  npm install @swimlane/ngx-charts --save
-  npm install d3 @angular/animations --save
-  npm install rxjs
-  npm install -D tailwindcss postcss autoprefixer
-  npm install tailwind-scrollbar-hide
-  npm install @fortawesome/angular-fontawesome
-  npm install --save @fortawesome/fontawesome-svg-core
-  npm install --save @fortawesome/free-brands-svg-icons
-  npm install --save @fortawesome/pro-solid-svg-icons
-  npm install --save @fortawesome/pro-regular-svg-icons
-  npm install --save @fortawesome/pro-light-svg-icons
-  npm install --save @fortawesome/pro-thin-svg-icons
-  npm install --save @fortawesome/pro-duotone-svg-icons
-  npm install --save @fortawesome/sharp-solid-svg-icons
-  npm install --save @fortawesome/sharp-regular-svg-icons
-  npm install --save @fortawesome/sharp-light-svg-icons
-  npm install --save @fortawesome/fontawesome-pro
+  npm install --save @types/node @types/uuid
+  npm install --save @swimlane/ngx-charts d3 @angular/animations rxjs
+  npm install --save-dev tailwindcss postcss autoprefixer
+  npm install --save tailwind-scrollbar-hide
+  npm install --save @fortawesome/angular-fontawesome @fortawesome/fontawesome-svg-core
+  npm install --save @fortawesome/free-brands-svg-icons @fortawesome/pro-solid-svg-icons
+  npm install --save @fortawesome/pro-regular-svg-icons @fortawesome/pro-light-svg-icons
+  npm install --save @fortawesome/pro-thin-svg-icons @fortawesome/pro-duotone-svg-icons
+  npm install --save @fortawesome/sharp-solid-svg-icons @fortawesome/sharp-regular-svg-icons
+  npm install --save @fortawesome/sharp-light-svg-icons @fortawesome/fontawesome-pro
+}
+
+function setup_styles {
+  mkdir -p src/styles
+  reset_css > src/styles/reset.css
+  tailwind_setup
 }
 
 function reset_css {
-  cat <<EOL > reset.css
+  cat <<EOL
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
